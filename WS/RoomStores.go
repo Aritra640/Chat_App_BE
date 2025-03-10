@@ -64,3 +64,29 @@ func (rs *RoomStore) Run() {
     go room.Run()
   }
 }
+
+//send a message to all subscribed rooms 
+func (rs *RoomStore) SendChatMessage(chat string, socket *websocket.Conn) error {
+  rs.Mu.RLock()
+  defer rs.Mu.RUnlock() 
+
+  for _,room := range rs.Rooms {
+    room.RoomMU.Lock()
+    _,ok := room.Clients[socket]
+    room.RoomMU.Unlock()
+    if ok {
+      room.MessageCh <- Message{
+        Owner: socket,
+        Chat: chat,
+      }
+    }
+  }
+
+  return nil
+}
+
+
+//Add rooms in a rs 
+func (rs *RoomStore) AddRoom(roomID string) {
+  rs.Rooms[roomID] = NewRoom()
+}
