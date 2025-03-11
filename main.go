@@ -8,6 +8,10 @@ import (
 
 func main() {
 
+
+  ws.WSinit()
+  go ws.RS.Run()
+
 	e := echo.New()
   e.Use(middleware.CORS())
 

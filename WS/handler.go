@@ -12,7 +12,7 @@ var RS RoomStore
 
 //Initialise ws room-store and add rooms to it
 func WSinit() {
-  RS = *NewRoomStore()
+  RS := *NewRoomStore()
   RS.AddRoom("Red")
   RS.AddRoom("Violet")
 }
