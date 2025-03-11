@@ -26,6 +26,7 @@ type Room struct {
 	Clients   map[*websocket.Conn]bool
 	RoomMU    sync.Mutex
 	Stop      chan struct{}
+  WriteMu   sync.Mutex
 }
 
 func NewRoom() *Room {
@@ -63,7 +64,9 @@ func (r *Room) Run() {
 			r.RoomMU.Lock()
 
 			for client := range r.Clients {
+        r.WriteMu.Lock()
 				err := client.WriteMessage(websocket.TextMessage, []byte(msg.Chat))
+        r.WriteMu.Unlock()
 				if err != nil {
 					log.Println("Error: ", err)
 					client.Close()

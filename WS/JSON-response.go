@@ -14,7 +14,7 @@ type Payload struct {
   Object string `json:"object"`
 }
 
-func get_data_resp(str []byte) (Response , error) {
+func Get_data_resp(str []byte) (Response , error) {
   
   var res Response
   err := json.Unmarshal(str, &res); if err != nil {

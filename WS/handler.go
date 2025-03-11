@@ -12,7 +12,7 @@ var RS RoomStore
 
 //Initialise ws room-store and add rooms to it
 func WSinit() {
-  RS := *NewRoomStore()
+  RS = *NewRoomStore()
   RS.AddRoom("Red")
   RS.AddRoom("Violet")
 }
@@ -35,7 +35,8 @@ func ConnectionHandler(c echo.Context) error {
     }
 
     //now deal with the message json-tag
-    res,err := get_data_resp(msg); if err != nil {
+    res,err := Get_data_resp(msg); if err != nil {
+      log.Println(err)
       ws.WriteMessage(websocket.TextMessage , []byte("request format is not correct (System Message)"))
       continue
     }

@@ -55,38 +55,60 @@ func (rs *RoomStore) AddConnectionByID(roomID string, socket *websocket.Conn) er
 	return nil
 }
 
-//Run add rooms concurrently
+// Run add rooms concurrently
 func (rs *RoomStore) Run() {
-  rs.Mu.RLock()
-  defer rs.Mu.RUnlock() 
+	rs.Mu.RLock()
+	defer rs.Mu.RUnlock()
 
-  for _,room := range rs.Rooms {
-    go room.Run()
-  }
+	for _, room := range rs.Rooms {
+		go room.Run()
+	}
 }
 
-//send a message to all subscribed rooms 
+// send a message to all subscribed rooms
 func (rs *RoomStore) SendChatMessage(chat string, socket *websocket.Conn) error {
-  rs.Mu.RLock()
-  defer rs.Mu.RUnlock() 
+	rs.Mu.RLock()
+	defer rs.Mu.RUnlock()
 
-  for _,room := range rs.Rooms {
-    room.RoomMU.Lock()
-    _,ok := room.Clients[socket]
-    room.RoomMU.Unlock()
-    if ok {
-      room.MessageCh <- Message{
-        Owner: socket,
-        Chat: chat,
-      }
-    }
-  }
+	for _, room := range rs.Rooms {
+		room.RoomMU.Lock()
+		_, ok := room.Clients[socket]
+		room.RoomMU.Unlock()
+		if ok {
+			room.MessageCh <- Message{
+				Owner: socket,
+				Chat:  chat,
+			}
+		}
+	}
 
-  return nil
+	return nil
 }
 
-
-//Add rooms in a rs 
+// Add rooms in a rs
 func (rs *RoomStore) AddRoom(roomID string) {
-  rs.Rooms[roomID] = NewRoom()
+	rs.Mu.Lock()
+	defer rs.Mu.Unlock()
+	rs.Rooms[roomID] = NewRoom()
+}
+
+// check rooms
+func (rs *RoomStore) CheckRoomIDs() bool {
+	rs.Mu.RLock()
+	_, ok := rs.Rooms["Red"]
+	rs.Mu.RUnlock()
+	if !ok {
+		log.Println("could not find red")
+		return false
+	}
+
+	rs.Mu.RLock()
+	_, ok = rs.Rooms["Violet"]
+	rs.Mu.RUnlock()
+	if !ok {
+		log.Println("could not find violet")
+		return false
+	}
+
+	return true
 }
